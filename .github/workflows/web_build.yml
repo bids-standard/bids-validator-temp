@@ -3,9 +3,9 @@ name: Web validator
 
 on:
   push:
-    branches: [master, main]
+    branches: [main, stable]
   pull_request:
-    branches: [master, main]
+    branches: [main, stable]
   release:
     types: [published]
   workflow_dispatch:
@@ -20,7 +20,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  test-build:
+    if: ${{ github.event_name != 'release' && !inputs.deploy }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,20 +35,47 @@ jobs:
         with:
           path: web/dist
 
+  build:
+    if: ${{ github.event_name == 'release' || inputs.deploy }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release/target
+        uses: actions/checkout@v4
+        with:
+          # Use the implicit ref, assuming it's stable
+          path: stable
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Build release/target
+        run: deno task build
+        working-directory: stable/web
+      - name: Build main
+        run: deno task build
+        working-directory: main/web
+      - name: Nest main inside stable
+        run: mv main/web/dist stable/web/dist/dev
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: stable/web/dist
+
   deploy:
     needs: build
-    if: ${{ github.event_name == 'release' || inputs.deploy }}
     permissions:
       contents: read
       pages: write
       id-token: write
-    # Deploy to the github-pages environment
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    # Specify runner + deployment step
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 # or specific "vX.X.X" version tag for this action
+        uses: actions/deploy-pages@v4
