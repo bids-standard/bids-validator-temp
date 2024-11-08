@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import "./App.css"
 import { directoryOpen } from "https://esm.sh/browser-fs-access@0.35.0"
+import confetti, { create } from 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.module.mjs';
 import { fileListToTree, validate } from "../dist/validator/main.js"
 import type { ValidationResult } from "../../src/types/validation-result.ts"
 import { Collapse } from "./Collapse.tsx"
@@ -61,6 +62,7 @@ function App() {
   if (validation) {
     const errorList = []
     const warningList = []
+    let success = ""
     for (const [code, issues] of validation.issues.filter({ severity: 'error' }).groupBy('code')) {
       if (code === 'None') {
         continue
@@ -73,6 +75,20 @@ function App() {
       }
       warningList.push(...Issue({ data: issues }))
     }
+    if (errorList.length === 0 && warningList.length === 0) {
+      success = (
+      <div className="success">
+        <Collapse label="No Issues Detected!">
+          <div>Thanks for Everything. I Have No Complaints Whatsoever.</div>
+        </Collapse>
+      </div>
+      )
+      confetti({
+        particleCount: 500,
+        spread: 180,
+        ticks: 400
+      });
+    }
     validatorOutput = (
       <>
         <button onClick={validateDir}>Reselect Files</button>
@@ -80,6 +96,7 @@ function App() {
           <ul className="issues-list">
             {errorList}
             {warningList}
+            {success}
           </ul>
           <Summary data={validation.summary} />
           <a
@@ -92,7 +109,10 @@ function App() {
         </div>
       </>
     )
+    if (errorList.length === 0) {
+    }
   } else {
+
     validatorOutput = (
       <>
         <h2>
@@ -106,7 +126,6 @@ function App() {
       </>
     )
   }
-
   return (
     <>
       <h1>BIDS Validator</h1>

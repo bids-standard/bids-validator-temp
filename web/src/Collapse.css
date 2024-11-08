@@ -40,6 +40,10 @@ input[type='checkbox'] {
   background: #D55E00;
 }
 
+.success .lbl-toggle {
+  background: #49E048;
+}
+
 @media (prefers-color-scheme: light) {
   .lbl-toggle {
     color: #000;
@@ -56,6 +60,9 @@ input[type='checkbox'] {
   
   .error .lbl-toggle {
     background: #D55E00;
+  }
+  .success .lbl-toggle {
+    background: #49E048;
   }
 }
 
