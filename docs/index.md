@@ -26,6 +26,7 @@ deno run -A jsr:@bids/validator
 ```
 
 ```{toctree}
+:maxdepth: 2
 :hidden:
 :caption: User guide
 
@@ -35,12 +36,21 @@ user_guide/issues.md
 ```
 
 ```{toctree}
+:maxdepth: 2
 :hidden:
 :caption: Developer guide
 
 dev/using-the-api.md
 dev/contributing.md
 dev/environment.md
+```
+
+```{toctree}
+:maxdepth: 2
+:hidden:
+:caption: Concepts
+
+validation-model/index.md
 ```
 
 ```{toctree}
